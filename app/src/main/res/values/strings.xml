@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">IcePlayer</string>
+    <string name="title_activity_welcome">SplashActivity</string>
+    <string name="tv_tip_timer_countdown">Countdown</string>
+</resources>
