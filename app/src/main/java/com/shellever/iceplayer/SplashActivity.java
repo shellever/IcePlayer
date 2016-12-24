@@ -17,6 +17,8 @@ import android.widget.TextView;
 //
 // 全屏模式：继承自Activity并设置主题为android:theme="@android:style/Theme.NoTitleBar.Fullscreen"即可
 //
+// 在闪屏页中先启动MyMusicService后台服务，后面就可以多次绑定服务
+//
 public class SplashActivity extends Activity {
 
     private static final int MSG_TIMER_ONE_SECOND = 1;
@@ -48,6 +50,9 @@ public class SplashActivity extends Activity {
         mTimerValueTv = (TextView) findViewById(R.id.tv_timer_value);
         animation = AnimationUtils.loadAnimation(this, R.anim.anim_text_timer);
         handler.sendEmptyMessageDelayed(MSG_TIMER_ONE_SECOND, 1000);
+
+        // 在闪屏页中启动MyMusicService后台服务
+        startService(new Intent(this, MyMusicService.class));
     }
 
     private Handler handler = new Handler() {

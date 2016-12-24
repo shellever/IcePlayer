@@ -10,10 +10,15 @@ import com.astuetz.PagerSlidingTabStrip;
 import java.util.ArrayList;
 import java.util.List;
 
-// All in right
+// All in right.
 // android.support.v4.app.Fragment
+//
+// 优化：
+// 1. 可以把扫描手机图片的操作放在启动闪屏页的过程中(3-5秒的时间足够加载完所有图片)
+//
 
-public class MainActivity extends AppCompatActivity {
+// 继承自BaseActivity，用于绑定服务
+public class MainActivity extends BaseActivity {
 
     private PagerSlidingTabStrip mTabStrip;
     private ViewPager mViewPager;
