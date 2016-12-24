@@ -18,7 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 // BaseActivity中进行服务的绑定操作
 // 使用Binder机制来实现Activity与Service之间的交互
 //
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     protected MyMusicService mMusicService;     // 声明为protected权限，子类可以直接使用
     private boolean isBound = false;            // 是否已绑定
@@ -35,6 +35,10 @@ public class BaseActivity extends AppCompatActivity {
             MyMusicService.MusicServiceBinder binder = (MyMusicService.MusicServiceBinder) service;
             mMusicService = binder.getMusicService();
             isBound = true;     // 绑定成功
+
+            mMusicService.setMusicUpdateListener(listener);
+            // 绑定成功后调用监听onChange方法
+
         }
 
         @Override
@@ -60,5 +64,20 @@ public class BaseActivity extends AppCompatActivity {
             isBound = false;    // 解除绑定
         }
     }
+
+    public abstract void publish(int progress);
+    public abstract void change(int position);
+
+    private MyMusicService.MusicUpdateListener listener = new MyMusicService.MusicUpdateListener() {
+        @Override
+        public void onPublish(int progress) {
+            publish(progress);
+        }
+
+        @Override
+        public void onChange(int position) {
+            change(position);
+        }
+    };
 
 }

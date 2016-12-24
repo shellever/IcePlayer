@@ -28,6 +28,8 @@ public class MyMusicService extends Service {
     private List<Mp3Info> mMp3InfoList;
     private int curPos;       // 当前播放的歌曲位置
 
+    private MusicUpdateListener mListener;
+
 
     public MyMusicService() {
     }
@@ -94,6 +96,17 @@ public class MyMusicService extends Service {
             curPos = 0;
         }
         play(curPos);
+    }
+
+    public void setMusicUpdateListener(MusicUpdateListener listener) {
+        mListener = listener;
+    }
+
+    // 状态更新回调接口
+    public interface MusicUpdateListener {
+        void onPublish(int progress);       // 更新进度条
+
+        void onChange(int position);        // 切换播放位置
     }
 
     // AIDL - IPC

@@ -41,4 +41,17 @@ public class MainActivity extends BaseActivity {
 
         mTabStrip.setViewPager(mViewPager);
     }
+
+    // ========================================
+    // 实现BaseActivity中的两个抽象方法
+    @Override
+    public void publish(int progress) {
+        // 更新进度条
+    }
+
+    @Override
+    public void change(int position) {
+        // 切换播放位置
+    }
+    // ========================================
 }
