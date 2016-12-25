@@ -9,6 +9,8 @@ import android.os.IBinder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -28,6 +30,8 @@ public class MyMusicService extends Service {
     private List<Mp3Info> mMp3InfoList;
     private int curPos;       // 当前播放的歌曲位置
 
+    private ExecutorService mThreadExecutor;    // 单线程池
+
     private MusicUpdateListener mListener;
 
 
@@ -45,11 +49,14 @@ public class MyMusicService extends Service {
         super.onCreate();
         mMediaPlayer = new MediaPlayer();
         mMp3InfoList = MediaUtils.getMp3InfoList(this);     // 耗时操作，应该进行异步处理
+
+        mThreadExecutor = Executors.newSingleThreadExecutor();   // 线程池初始化
+        mThreadExecutor.execute(mMusicStatusUpdateTask);     // 执行任务
     }
 
     // 播放歌曲 (从暂停状态开始播放)
     public void start() {
-        if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+        if (checkMediaPlayer()) {
             mMediaPlayer.start();
         }
     }
@@ -63,7 +70,17 @@ public class MyMusicService extends Service {
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+                    if (mListener != null) {
+                        mListener.onChange(curPos);
+                    }
                     mMediaPlayer.start();
+                }
+            });
+            mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    mMediaPlayer.reset();
+                    return false;
                 }
             });
             mMediaPlayer.prepareAsync();    // 异步准备
@@ -75,7 +92,7 @@ public class MyMusicService extends Service {
 
     // 暂停播放
     public void pause() {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+        if (checkMediaPlayer()) {
             mMediaPlayer.pause();
         }
     }
@@ -98,6 +115,53 @@ public class MyMusicService extends Service {
         play(curPos);
     }
 
+    // 在音乐播放中，获得播放的位置信息
+    public int getDuration() {
+        return mMediaPlayer.getDuration();
+    }
+
+    // 跳转到某个地方
+    public void seekTo(int msec) {
+        mMediaPlayer.seekTo(msec);
+    }
+
+    // 返回当前的位置
+    public int getCurrentPosition() {
+        return curPos;
+    }
+
+    // 获得当前位置
+    public int getCurrentProgress() {
+        if (checkMediaPlayer()) {
+            return mMediaPlayer.getCurrentPosition();
+        }
+        return 0;
+    }
+
+    // 反馈状态
+    public boolean isPlaying() {
+        return checkMediaPlayer();
+    }
+
+    // 实时更新播放进度
+    private Runnable mMusicStatusUpdateTask = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                if (checkMediaPlayer()) {
+                    if (mListener != null) {
+                        mListener.onPublish(getCurrentProgress());  // 更新进度
+                    }
+                }
+            }
+        }
+    };
+
+    // 检查MediaPlayer是否正在播放
+    private boolean checkMediaPlayer() {
+        return mMediaPlayer != null && mMediaPlayer.isPlaying();
+    }
+
     public void setMusicUpdateListener(MusicUpdateListener listener) {
         mListener = listener;
     }
@@ -115,6 +179,15 @@ public class MyMusicService extends Service {
     public class MusicServiceBinder extends Binder {
         public MyMusicService getMusicService() {
             return MyMusicService.this;     // 获取当前Service的实例
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mThreadExecutor != null && mThreadExecutor.isTerminated()) {
+            mThreadExecutor.shutdown();
+            mThreadExecutor = null;
         }
     }
 }

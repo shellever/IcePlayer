@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 /**
  * Author: Shellever
@@ -20,6 +21,8 @@ import android.support.v7.app.AppCompatActivity;
 //
 public abstract class BaseActivity extends AppCompatActivity {
 
+    private static final boolean DEBUG = true;
+
     protected MyMusicService mMusicService;     // 声明为protected权限，子类可以直接使用
     private boolean isBound = false;            // 是否已绑定
 
@@ -29,16 +32,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
     }
 
+    // 绑定服务成功后回调接口
     private ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyMusicService.MusicServiceBinder binder = (MyMusicService.MusicServiceBinder) service;
             mMusicService = binder.getMusicService();
             isBound = true;     // 绑定成功
+            showToast("bind success");
 
+            // 绑定成功后设置回调事件监听
             mMusicService.setMusicUpdateListener(listener);
-            // 绑定成功后调用监听onChange方法
-
         }
 
         @Override
@@ -62,10 +66,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (isBound) {
             unbindService(conn);
             isBound = false;    // 解除绑定
+            showToast("unbind success");
         }
     }
 
+    // 使用抽象方式，强制让子类实现其具体操作
     public abstract void publish(int progress);
+
     public abstract void change(int position);
 
     private MyMusicService.MusicUpdateListener listener = new MyMusicService.MusicUpdateListener() {
@@ -79,5 +86,12 @@ public abstract class BaseActivity extends AppCompatActivity {
             change(position);
         }
     };
+
+    // 用于调试信息输出
+    private void showToast(String info) {
+        if (DEBUG) {
+            Toast.makeText(BaseActivity.this, info, Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }
