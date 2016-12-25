@@ -3,4 +3,8 @@
     <string name="app_name">IcePlayer</string>
     <string name="title_activity_welcome">SplashActivity</string>
     <string name="tv_tip_timer_countdown">倒计时</string>
+
+    <string name="tip_play_mode_order">顺序播放</string>
+    <string name="tip_play_mode_random">随机播放</string>
+    <string name="tip_play_mode_single">单曲循环</string>
 </resources>

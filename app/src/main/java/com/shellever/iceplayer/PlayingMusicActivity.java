@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
-public class PlayingMusicActivity extends BaseActivity implements View.OnClickListener {
+public class PlayingMusicActivity extends BaseActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
     private static final int MSG_UPDATE_PROGRESS = 1;
 
@@ -62,6 +62,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         mSongDurationTv = (TextView) findViewById(R.id.tv_activity_song_duration);
 
         mSeekBar = (SeekBar) findViewById(R.id.sb_activity_progress);
+        mSeekBar.setOnSeekBarChangeListener(this);
 
         // 从LocalMusicFragment转到PlayingMusicActivity时，需要将进度值传过来，
         // 因为更新率为500毫秒，可能出现00:00的情况，故需要在创建时进行赋值操作
@@ -113,7 +114,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         }
 
         // 播放模式
-        switch (mMusicService.getPlayMode()){
+        switch (mMusicService.getPlayMode()) {
             case MyMusicService.PLAY_MODE_ORDER:
                 mPlayModeIv.setImageResource(R.drawable.order);
                 break;
@@ -150,24 +151,50 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                 }
                 break;
             case R.id.iv_activity_playing_mode:     // 播放模式
-                switch (mMusicService.getPlayMode()){
+                switch (mMusicService.getPlayMode()) {
                     case MyMusicService.PLAY_MODE_ORDER:
                         mMusicService.setPlayMode(MyMusicService.PLAY_MODE_RANDOM);
                         mPlayModeIv.setImageResource(R.drawable.random);
-                        Toast.makeText(PlayingMusicActivity.this, "随机播放", Toast.LENGTH_SHORT).show();
+                        showTip(R.string.tip_play_mode_random);
                         break;
                     case MyMusicService.PLAY_MODE_RANDOM:
                         mMusicService.setPlayMode(MyMusicService.PLAY_MODE_SINGLE);
                         mPlayModeIv.setImageResource(R.drawable.single);
-                        Toast.makeText(PlayingMusicActivity.this, "单曲循环", Toast.LENGTH_SHORT).show();
+                        showTip(R.string.tip_play_mode_single);
                         break;
                     case MyMusicService.PLAY_MODE_SINGLE:
                         mMusicService.setPlayMode(MyMusicService.PLAY_MODE_ORDER);
                         mPlayModeIv.setImageResource(R.drawable.order);
-                        Toast.makeText(PlayingMusicActivity.this, "顺序播放", Toast.LENGTH_SHORT).show();
+                        showTip(R.string.tip_play_mode_order);
                         break;
                 }
                 break;
         }
+    }
+
+    // =============================================================================
+    // SeekBar.OnSeekBarChangeListener
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+            mMusicService.pause();          // 先暂停
+            mMusicService.seekTo(progress); // 再根据拖动来设置进度
+            mMusicService.start();          // 最后播放
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+    // =============================================================================
+
+    private void showTip(int resId){
+        Toast.makeText(PlayingMusicActivity.this, getString(resId), Toast.LENGTH_SHORT).show();
     }
 }
