@@ -172,14 +172,18 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
+    // isPause有问题，即起到的是刚开始启动时没有播放状态时会首先调用play(0)一次，以后就不再调用
+    // 在暂停状态下，拖动SeekBar时，没有更新Play_Pause按钮状态
     // =============================================================================
     // SeekBar.OnSeekBarChangeListener
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
-            mMusicService.pause();          // 先暂停
+            //mMusicService.pause();          // 先暂停
             mMusicService.seekTo(progress); // 再根据拖动来设置进度
-            mMusicService.start();          // 最后播放
+            //mMusicService.start();          // 最后播放
+
+            mStartedTimeTv.setText(MediaUtils.formatTime(progress));    // 拖动的同时更新已经开始的时间位置
         }
     }
 
@@ -194,6 +198,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
     }
     // =============================================================================
 
+    // 播放模式提示信息
     private void showTip(int resId){
         Toast.makeText(PlayingMusicActivity.this, getString(resId), Toast.LENGTH_SHORT).show();
     }
