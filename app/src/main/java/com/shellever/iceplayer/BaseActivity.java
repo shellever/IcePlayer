@@ -43,6 +43,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             // 绑定成功后设置回调事件监听
             mMusicService.setMusicUpdateListener(listener);
+
+            // 绑定成功后调用监听onChange()方法
+            listener.onChange(mMusicService.getCurrentPosition());
         }
 
         @Override
@@ -70,6 +73,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    // 模板设计模式
     // 使用抽象方式，强制让子类实现其具体操作
     public abstract void publish(int progress);
 

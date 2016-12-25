@@ -1,6 +1,7 @@
 package com.shellever.iceplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -21,6 +23,8 @@ import java.util.List;
  */
 
 public class LocalMusicFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
+
+    private static final boolean DEBUG = true;
 
     private ListView mLocalMusicLv;
     private ImageView mAlbumIv;
@@ -56,6 +60,7 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
         mAlbumIv = (ImageView) view.findViewById(R.id.iv_album);
         mPlayPauseActionIv = (ImageView) view.findViewById(R.id.iv_action_play_pause);
         mNextActionIv = (ImageView) view.findViewById(R.id.iv_action_next);
+        mAlbumIv.setOnClickListener(this);
         mPlayPauseActionIv.setOnClickListener(this);
         mNextActionIv.setOnClickListener(this);
 
@@ -63,8 +68,27 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
         mPlayingSingerNameTv = (TextView) view.findViewById(R.id.tv_playing_singer_name);
 
         loadMp3InfoList();      // 加载Mp3列表
-        mMainActivity.bindMusicService();     // 绑定服务
         return view;
+    }
+
+    // ===================================================
+    // 绑定后会回调onChange()方法，从而回调changeUIStatus()方法
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMainActivity.bindMusicService();     // 绑定服务
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMainActivity.unbindMusicService();   // 解除绑定
+    }
+    // ===================================================
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 
     private void loadMp3InfoList() {
@@ -73,23 +97,24 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
         mLocalMusicLv.setAdapter(mLocalMusicAdapter);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mMainActivity.unbindMusicService();   // 解除绑定
-    }
-
     // AdapterView.OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         mMainActivity.mMusicService.play(position); // 绑定成功之后才能调用Service的play方法，否则会报空指针异常
+        mPlayPauseActionIv.setImageResource(R.drawable.pause);
+        showToast("LocalMusicFragment::onItemClick()");
     }
 
+    // 每次点击列表歌曲项或者切换至下一首时会被回调
     public void changeUIStatus(int position) {
         Mp3Info mp3Info = mMp3InfoList.get(position);
         mPlayingSongNameTv.setText(mp3Info.getTitle());
         mPlayingSingerNameTv.setText(mp3Info.getArtist());
-        mPlayPauseActionIv.setImageResource(R.drawable.player_btn_pause_normal);
+        if (mMainActivity.mMusicService.isPlaying()) {
+            mPlayPauseActionIv.setImageResource(R.drawable.pause);
+        } else {
+            mPlayPauseActionIv.setImageResource(R.drawable.play);
+        }
         mAlbumIv.setImageBitmap(MediaUtils.getArtwork(mMainActivity, mp3Info.getId(), mp3Info.getAlbumId(), true, true));
     }
 
@@ -98,9 +123,33 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_action_play_pause:
+                if (mMainActivity.mMusicService.isPlaying()) {      // 播放 -> 暂停
+                    mMainActivity.mMusicService.pause();
+                    mPlayPauseActionIv.setImageResource(R.drawable.play);
+                } else {
+                    if (mMainActivity.mMusicService.isPause()) {        // 暂停 -> 播放
+                        mMainActivity.mMusicService.start();
+                        mPlayPauseActionIv.setImageResource(R.drawable.pause);
+                    } else {
+                        mMainActivity.mMusicService.play(0);        // 第一次点击歌曲列表播放
+                    }
+                }
                 break;
             case R.id.iv_action_next:
+                mMainActivity.mMusicService.next();
                 break;
+            case R.id.iv_album:
+                Intent intent = new Intent(mMainActivity, PlayingMusicActivity.class);
+                intent.putExtra("progress", mMainActivity.mMusicService.getCurrentProgress());
+                startActivity(intent);
+                break;
+        }
+    }
+
+    // 用于调试信息输出
+    private void showToast(String info) {
+        if (DEBUG) {
+            Toast.makeText(mMainActivity, info, Toast.LENGTH_SHORT).show();
         }
     }
 }

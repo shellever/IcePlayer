@@ -29,6 +29,7 @@ public class MyMusicService extends Service {
     private MediaPlayer mMediaPlayer;
     private List<Mp3Info> mMp3InfoList;
     private int curPos;       // 当前播放的歌曲位置
+    private boolean isPause = false;
 
     private ExecutorService mThreadExecutor;    // 单线程池
 
@@ -56,7 +57,7 @@ public class MyMusicService extends Service {
 
     // 播放歌曲 (从暂停状态开始播放)
     public void start() {
-        if (checkMediaPlayer()) {
+        if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
         }
     }
@@ -70,10 +71,16 @@ public class MyMusicService extends Service {
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+                    mMediaPlayer.start();               // 1st
                     if (mListener != null) {
-                        mListener.onChange(curPos);
+                        mListener.onChange(curPos);     // 2nd 播放位置改变回调，因为在onChange()会进行isPlayer()判断，故必须start()后才回调
                     }
-                    mMediaPlayer.start();
+                }
+            });
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    next();     // 自动播放下一曲
                 }
             });
             mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -94,6 +101,7 @@ public class MyMusicService extends Service {
     public void pause() {
         if (checkMediaPlayer()) {
             mMediaPlayer.pause();
+            isPause = true;     // 暂停
         }
     }
 
@@ -143,6 +151,11 @@ public class MyMusicService extends Service {
         return checkMediaPlayer();
     }
 
+    // 在fragment或者activity中可以获得状态
+    public boolean isPause() {
+        return isPause;
+    }
+
     // 实时更新播放进度
     private Runnable mMusicStatusUpdateTask = new Runnable() {
         @Override
@@ -152,6 +165,11 @@ public class MyMusicService extends Service {
                     if (mListener != null) {
                         mListener.onPublish(getCurrentProgress());  // 更新进度
                     }
+                }
+                try {
+                    Thread.sleep(500);      // 限制更新频率500ms一次
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
