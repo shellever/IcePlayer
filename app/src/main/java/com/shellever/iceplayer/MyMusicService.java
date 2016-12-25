@@ -34,12 +34,12 @@ public class MyMusicService extends Service
 
     private MediaPlayer mMediaPlayer;
     private List<Mp3Info> mMp3InfoList;
-    private int curPos;       // 当前播放的歌曲位置
+    private int curPos;                                 // 当前播放的歌曲位置
     private boolean isPause = false;
     private int mPlayMode = PLAY_MODE_ORDER;            // 默认为顺序播放
     private Random random = new Random();
 
-    private ExecutorService mThreadExecutor;    // 单线程池
+    private ExecutorService mThreadExecutor;            // 单线程池
 
     private MusicUpdateListener mListener;
 

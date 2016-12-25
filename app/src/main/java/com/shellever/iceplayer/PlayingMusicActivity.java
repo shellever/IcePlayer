@@ -146,7 +146,8 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                         mPlayPauseActionIv.setImageResource(R.drawable.pause);  // 正在暂停则点击后显示播放按钮
                         mMusicService.start();
                     } else {
-                        mMusicService.play(0);        // 可以使用SharedPreferences来保存播放位置
+                        int curPos = mMusicService.getCurrentPosition();
+                        mMusicService.play(curPos);        // 0
                     }
                 }
                 break;
