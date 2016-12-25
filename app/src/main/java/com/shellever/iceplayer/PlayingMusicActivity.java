@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -110,16 +111,32 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         } else {
             mPlayPauseActionIv.setImageResource(R.drawable.play);   // 正在暂停则显示播放按钮
         }
+
+        // 播放模式
+        switch (mMusicService.getPlayMode()){
+            case MyMusicService.PLAY_MODE_ORDER:
+                mPlayModeIv.setImageResource(R.drawable.order);
+                break;
+            case MyMusicService.PLAY_MODE_RANDOM:
+                mPlayModeIv.setImageResource(R.drawable.random);
+                break;
+            case MyMusicService.PLAY_MODE_SINGLE:
+                mPlayModeIv.setImageResource(R.drawable.single);
+                break;
+        }
     }
 
     // View.OnClickListener
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.iv_activity_action_prev:
+            case R.id.iv_activity_action_prev:      // 上一首
                 mMusicService.prev();
                 break;
-            case R.id.iv_activity_action_play_pause:
+            case R.id.iv_activity_action_next:      // 下一首
+                mMusicService.next();
+                break;
+            case R.id.iv_activity_action_play_pause:// 播放或暂停
                 if (mMusicService.isPlaying()) {
                     mMusicService.pause();
                     mPlayPauseActionIv.setImageResource(R.drawable.play);   // 正在播放则点击后显示暂停按钮
@@ -132,8 +149,24 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                     }
                 }
                 break;
-            case R.id.iv_activity_action_next:
-                mMusicService.next();
+            case R.id.iv_activity_playing_mode:     // 播放模式
+                switch (mMusicService.getPlayMode()){
+                    case MyMusicService.PLAY_MODE_ORDER:
+                        mMusicService.setPlayMode(MyMusicService.PLAY_MODE_RANDOM);
+                        mPlayModeIv.setImageResource(R.drawable.random);
+                        Toast.makeText(PlayingMusicActivity.this, "随机播放", Toast.LENGTH_SHORT).show();
+                        break;
+                    case MyMusicService.PLAY_MODE_RANDOM:
+                        mMusicService.setPlayMode(MyMusicService.PLAY_MODE_SINGLE);
+                        mPlayModeIv.setImageResource(R.drawable.single);
+                        Toast.makeText(PlayingMusicActivity.this, "单曲循环", Toast.LENGTH_SHORT).show();
+                        break;
+                    case MyMusicService.PLAY_MODE_SINGLE:
+                        mMusicService.setPlayMode(MyMusicService.PLAY_MODE_ORDER);
+                        mPlayModeIv.setImageResource(R.drawable.order);
+                        Toast.makeText(PlayingMusicActivity.this, "顺序播放", Toast.LENGTH_SHORT).show();
+                        break;
+                }
                 break;
         }
     }

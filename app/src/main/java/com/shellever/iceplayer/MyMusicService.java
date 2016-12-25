@@ -9,6 +9,7 @@ import android.os.IBinder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,12 +25,19 @@ import java.util.concurrent.Executors;
  * 7、播放模式
  */
 
-public class MyMusicService extends Service {
+public class MyMusicService extends Service
+        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener{
+
+    public static final int PLAY_MODE_ORDER = 1;       // 顺序播放
+    public static final int PLAY_MODE_RANDOM = 2;      // 随机播放
+    public static final int PLAY_MODE_SINGLE = 3;      // 单曲循环
 
     private MediaPlayer mMediaPlayer;
     private List<Mp3Info> mMp3InfoList;
     private int curPos;       // 当前播放的歌曲位置
     private boolean isPause = false;
+    private int mPlayMode = PLAY_MODE_ORDER;            // 默认为顺序播放
+    private Random random = new Random();
 
     private ExecutorService mThreadExecutor;    // 单线程池
 
@@ -55,6 +63,14 @@ public class MyMusicService extends Service {
         mThreadExecutor.execute(mMusicStatusUpdateTask);     // 执行任务
     }
 
+    public int getPlayMode() {
+        return mPlayMode;
+    }
+
+    public void setPlayMode(int mPlayMode) {
+        this.mPlayMode = mPlayMode;
+    }
+
     // 播放歌曲 (从暂停状态开始播放)
     public void start() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
@@ -68,28 +84,9 @@ public class MyMusicService extends Service {
         mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(this, Uri.parse(mp3Info.getUrl()));  // 设置数据源
-            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mMediaPlayer.start();               // 1st
-                    if (mListener != null) {
-                        mListener.onChange(curPos);     // 2nd 播放位置改变回调，因为在onChange()会进行isPlayer()判断，故必须start()后才回调
-                    }
-                }
-            });
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    next();     // 自动播放下一曲
-                }
-            });
-            mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    mMediaPlayer.reset();
-                    return false;
-                }
-            });
+            mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.prepareAsync();    // 异步准备
             curPos = pos;
         } catch (IOException e) {
@@ -183,6 +180,40 @@ public class MyMusicService extends Service {
     public void setMusicUpdateListener(MusicUpdateListener listener) {
         mListener = listener;
     }
+
+    // ======================================================
+    // MediaPlayer.OnPreparedListener
+    @Override
+    public void onPrepared(MediaPlayer mp) {    // 准备完成后再开始播放
+        mMediaPlayer.start();               // 1st
+        if (mListener != null) {
+            mListener.onChange(curPos);     // 2nd 播放位置改变回调，因为在onChange()会进行isPlayer()判断，故必须start()后才回调
+        }
+    }
+
+    // MediaPlayer.OnCompletionListener
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        switch (mPlayMode){             // 播放模式
+            case PLAY_MODE_ORDER:
+                next();
+                break;
+            case PLAY_MODE_RANDOM:
+                play(random.nextInt(mMp3InfoList.size()));
+                break;
+            case PLAY_MODE_SINGLE:
+                play(curPos);
+                break;
+        }
+    }
+
+    // MediaPlayer.OnErrorListener
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        mMediaPlayer.reset();       // 错误时直接复位
+        return false;
+    }
+    // ======================================================
 
     // 状态更新回调接口
     public interface MusicUpdateListener {
