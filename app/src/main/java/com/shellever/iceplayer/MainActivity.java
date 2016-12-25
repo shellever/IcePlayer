@@ -1,5 +1,6 @@
 package com.shellever.iceplayer;
 
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
@@ -66,4 +67,18 @@ public class MainActivity extends BaseActivity {
         }
     }
     // ========================================
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 保存当前播放的一些状态值
+        MainApplication app = (MainApplication) getApplication();
+        SharedPreferences.Editor editor = app.sp.edit();
+        // 保存当前正在播放的歌曲的位置
+        editor.putInt("curPos", mMusicService.getCurrentPosition());
+        // 保存播放模式
+        editor.putInt("mPlayMode", mMusicService.getPlayMode());
+        // 保存提交
+        editor.apply();
+    }
 }

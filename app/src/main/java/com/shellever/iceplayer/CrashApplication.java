@@ -8,7 +8,7 @@ import android.app.Application;
  * Email:  shellever@163.com
  */
 
-// AndroidManifest.xml/Application
+// AndroidManifest.xml/IcePlayerApplication
 // android:name=".CrashApplication"
 
 public class CrashApplication extends Application {

@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  */
 
 public class MyMusicService extends Service
-        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener{
+        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     public static final int PLAY_MODE_ORDER = 1;       // 顺序播放
     public static final int PLAY_MODE_RANDOM = 2;      // 随机播放
@@ -56,7 +56,17 @@ public class MyMusicService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // 恢复状态值
+        MainApplication app = (MainApplication) getApplication();
+        curPos = app.sp.getInt("curPos", 0);
+        mPlayMode = app.sp.getInt("mPlayMode", PLAY_MODE_ORDER);
+
         mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnErrorListener(this);
+
         mMp3InfoList = MediaUtils.getMp3InfoList(this);     // 耗时操作，应该进行异步处理
 
         mThreadExecutor = Executors.newSingleThreadExecutor();   // 线程池初始化
@@ -84,9 +94,6 @@ public class MyMusicService extends Service
         mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(this, Uri.parse(mp3Info.getUrl()));  // 设置数据源
-            mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.setOnCompletionListener(this);
-            mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.prepareAsync();    // 异步准备
             curPos = pos;
         } catch (IOException e) {
@@ -194,7 +201,7 @@ public class MyMusicService extends Service
     // MediaPlayer.OnCompletionListener
     @Override
     public void onCompletion(MediaPlayer mp) {
-        switch (mPlayMode){             // 播放模式
+        switch (mPlayMode) {             // 播放模式
             case PLAY_MODE_ORDER:
                 next();
                 break;
