@@ -132,7 +132,7 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
                         mPlayPauseActionIv.setImageResource(R.drawable.pause);
                     } else {
                         int curPos = mMainActivity.mMusicService.getCurrentPosition();
-                        mMainActivity.mMusicService.play(curPos);        // 0
+                        mMainActivity.mMusicService.play(curPos);        // default 0
                     }
                 }
                 break;

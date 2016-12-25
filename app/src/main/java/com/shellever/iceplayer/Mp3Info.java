@@ -17,6 +17,7 @@ public class Mp3Info {
     private long size;      // 大小
     private String url;     // 路径
     private int isMusic;    // 是否为音乐
+    private long mp3InfoId;  // 保存原始id，因为原先id在DbUtils中是默认主键使用
 
 
     public Mp3Info() {
@@ -92,6 +93,14 @@ public class Mp3Info {
 
     public void setIsMusic(int isMusic) {
         this.isMusic = isMusic;
+    }
+
+    public long getMp3InfoId() {
+        return mp3InfoId;
+    }
+
+    public void setMp3InfoId(long mp3InfoId) {
+        this.mp3InfoId = mp3InfoId;
     }
 
     @Override

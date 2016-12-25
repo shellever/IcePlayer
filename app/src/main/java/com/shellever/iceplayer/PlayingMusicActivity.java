@@ -10,6 +10,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lidroid.xutils.db.sqlite.Selector;
+import com.lidroid.xutils.exception.DbException;
+
 import java.util.List;
 
 public class PlayingMusicActivity extends BaseActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
@@ -18,6 +21,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
 
     private ImageView mAlbumIv;
     private ImageView mPlayModeIv;
+    private ImageView mFavoriteIv;
     private ImageView mPrevActionIv;
     private ImageView mPlayPauseActionIv;
     private ImageView mNextActionIv;
@@ -49,10 +53,12 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         mAlbumIv = (ImageView) findViewById(R.id.iv_activity_album);
 
         mPlayModeIv = (ImageView) findViewById(R.id.iv_activity_playing_mode);
+        mFavoriteIv = (ImageView) findViewById(R.id.iv_activity_favorite);
         mPrevActionIv = (ImageView) findViewById(R.id.iv_activity_action_prev);
         mPlayPauseActionIv = (ImageView) findViewById(R.id.iv_activity_action_play_pause);
         mNextActionIv = (ImageView) findViewById(R.id.iv_activity_action_next);
         mPlayModeIv.setOnClickListener(this);
+        mFavoriteIv.setOnClickListener(this);
         mPrevActionIv.setOnClickListener(this);
         mPlayPauseActionIv.setOnClickListener(this);
         mNextActionIv.setOnClickListener(this);
@@ -98,7 +104,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         handler.sendMessage(msg);
     }
 
-    // 绑定成功后异步回调
+    // 绑定成功后异步回调 (可以做些初始化操作)
     @Override
     public void change(int position) {
         Mp3Info mp3Info = mMp3InfoList.get(position);
@@ -113,7 +119,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
             mPlayPauseActionIv.setImageResource(R.drawable.play);   // 正在暂停则显示播放按钮
         }
 
-        // 播放模式
+        // 初始化播放模式状态
         switch (mMusicService.getPlayMode()) {
             case MyMusicService.PLAY_MODE_ORDER:
                 mPlayModeIv.setImageResource(R.drawable.order);
@@ -124,6 +130,19 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
             case MyMusicService.PLAY_MODE_SINGLE:
                 mPlayModeIv.setImageResource(R.drawable.single);
                 break;
+        }
+
+        // 初始化收藏状态
+        MainApplication app = (MainApplication) getApplication();
+        try {
+            Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", mp3Info.getId()));
+            if (result == null) {
+                mFavoriteIv.setImageResource(R.drawable.xin_bai);
+            } else {
+                mFavoriteIv.setImageResource(R.drawable.xin_hong);
+            }
+        } catch (DbException e) {
+            e.printStackTrace();
         }
     }
 
@@ -147,7 +166,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                         mMusicService.start();
                     } else {
                         int curPos = mMusicService.getCurrentPosition();
-                        mMusicService.play(curPos);        // 0
+                        mMusicService.play(curPos);        // default 0
                     }
                 }
                 break;
@@ -168,6 +187,25 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                         mPlayModeIv.setImageResource(R.drawable.order);
                         showTip(R.string.tip_play_mode_order);
                         break;
+                }
+                break;
+            case R.id.iv_activity_favorite:
+                MainApplication app = (MainApplication) getApplication();
+                Mp3Info current = mMp3InfoList.get(mMusicService.getCurrentPosition());
+                try {
+                    Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getId()));
+                    if (result == null) {
+                        current.setMp3InfoId(current.getId());  // 因为DbUtils中默认主键是id
+                        app.mDbUtils.save(current);             // 保存到数据库
+                        showTip(R.string.tip_favorite_like);
+                        mFavoriteIv.setImageResource(R.drawable.xin_hong);
+                    } else {
+                        app.mDbUtils.deleteById(Mp3Info.class, result.getId());
+                        showTip(R.string.tip_favorite_unlike);
+                        mFavoriteIv.setImageResource(R.drawable.xin_bai);
+                    }
+                } catch (DbException e) {
+                    e.printStackTrace();
                 }
                 break;
         }
@@ -200,7 +238,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
     // =============================================================================
 
     // 播放模式提示信息
-    private void showTip(int resId){
+    private void showTip(int resId) {
         Toast.makeText(PlayingMusicActivity.this, getString(resId), Toast.LENGTH_SHORT).show();
     }
 }

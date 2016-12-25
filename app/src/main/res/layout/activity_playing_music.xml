@@ -83,7 +83,7 @@
                 android:src="@drawable/order" />
 
             <ImageView
-                android:id="@+id/iv_activity_collect"
+                android:id="@+id/iv_activity_favorite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
