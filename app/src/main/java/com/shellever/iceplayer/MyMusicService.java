@@ -16,13 +16,13 @@ import java.util.concurrent.Executors;
 
 /**
  * 实现功能：
- * 1、点击列表上的某首歌播放
+ * 1、列表歌曲点击播放
  * 2、点击播放按钮，从暂停转为播放状态
  * 3、点击暂停按钮，从播放状态转为暂停状态
- * 4、上一首
- * 5、下一首
- * 6、播放进度显示
- * 7、播放模式
+ * 4、播放上一首
+ * 5、播放下一首
+ * 6、播放进度更新显示
+ * 7、播放模式切换
  */
 
 public class MyMusicService extends Service
@@ -63,10 +63,12 @@ public class MyMusicService extends Service
     public void onCreate() {
         super.onCreate();
 
+        // =====================================================
         // 恢复状态值
         MainApplication app = (MainApplication) getApplication();
         curPos = app.sp.getInt("curPos", 0);
         mPlayMode = app.sp.getInt("mPlayMode", PLAY_MODE_ORDER);
+        // =====================================================
 
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(this);

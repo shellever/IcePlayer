@@ -17,4 +17,8 @@
     <string name="title_actionbar_playing">Playing</string>
     <string name="title_actionbar_favorite">Favorite</string>
     <string name="title_actionbar_recent">Recent</string>
+    <string name="text_tv_search">Search</string>
+    <string name="hint_et_search">Search</string>
+    <string name="tv_text_searching">Searching...</string>
+    <string name="text_tv_down_to_the_end">Down to the end</string>
 </resources>
