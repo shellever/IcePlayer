@@ -13,4 +13,8 @@
     <string name="text_tv_favorite">Favorite</string>
     <string name="menu_action_title_favorites">Favorites</string>
     <string name="menu_action_title_recent">Recent</string>
+    <string name="text_tv_recent">Recent</string>
+    <string name="title_actionbar_playing">Playing</string>
+    <string name="title_actionbar_favorite">Favorite</string>
+    <string name="title_actionbar_recent">Recent</string>
 </resources>

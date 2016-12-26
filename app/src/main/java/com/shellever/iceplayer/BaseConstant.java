@@ -9,4 +9,5 @@ package com.shellever.iceplayer;
 public class BaseConstant {
     public static final String SP_NAME = "IcePlayer";
     public static final String DB_NAME = "IcePlayer.db";
+    public static final int MAX_RECENT_PLAY_RECORD = 12;
 }

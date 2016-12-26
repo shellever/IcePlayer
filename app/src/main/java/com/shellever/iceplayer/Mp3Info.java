@@ -18,6 +18,8 @@ public class Mp3Info {
     private String url;     // 路径
     private int isMusic;    // 是否为音乐
     private long mp3InfoId;  // 保存原始id，因为原先id在DbUtils中是默认主键使用
+    private long recentPlayTime;    // 保存最近播放的时间戳
+    private int isFavorite;         // 是否为收藏的音乐 // 1-收藏，0-未收藏
 
 
     public Mp3Info() {
@@ -101,6 +103,22 @@ public class Mp3Info {
 
     public void setMp3InfoId(long mp3InfoId) {
         this.mp3InfoId = mp3InfoId;
+    }
+
+    public long getRecentPlayTime() {
+        return recentPlayTime;
+    }
+
+    public void setRecentPlayTime(long recentPlayTime) {
+        this.recentPlayTime = recentPlayTime;
+    }
+
+    public int getIsFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(int isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
     @Override

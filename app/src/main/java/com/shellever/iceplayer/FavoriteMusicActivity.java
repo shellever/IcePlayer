@@ -6,6 +6,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.lidroid.xutils.db.sqlite.Selector;
 import com.lidroid.xutils.exception.DbException;
 
 import java.util.ArrayList;
@@ -34,10 +35,10 @@ public class FavoriteMusicActivity extends BaseActivity implements AdapterView.O
 
     // 若查找比较耗时，则应该使用线程来异步加载
     private List<Mp3Info> setupFavMp3InfoList() {
+        MainApplication app = (MainApplication) getApplication();
         List<Mp3Info> result = null;
         try {
-            MainApplication app = (MainApplication) getApplication();
-            result = app.mDbUtils.findAll(Mp3Info.class);     // 查找所有收藏过的音乐
+            result = app.mDbUtils.findAll(Selector.from(Mp3Info.class).where("isFavorite", "=", "1"));   // 查找所有收藏过的音乐
         } catch (DbException e) {
             e.printStackTrace();
         }
@@ -85,6 +86,24 @@ public class FavoriteMusicActivity extends BaseActivity implements AdapterView.O
             mMusicService.setMp3InfoList(mFavMp3InfoList);  // 设置当前播放列表为收藏的列表
         }
         mMusicService.play(position);
+
+        storeToRecentRecord();      // 保存当前歌曲到最近播放中(只有手动点击时才会保存到最近播放记录中)
     }
 
+    private void storeToRecentRecord() {
+        MainApplication app = (MainApplication) getApplication();
+        Mp3Info current = mMusicService.getCurMp3Info();
+        try {
+            Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getMp3InfoId()));
+            if (result == null) {       // 表中未有此记录
+                current.setRecentPlayTime(System.currentTimeMillis());  // 设置系统当前时间
+                app.mDbUtils.save(current); // 保存记录
+            } else {
+                result.setRecentPlayTime(System.currentTimeMillis());   // 更新时间
+                app.mDbUtils.update(result, "recentPlayTime");  // 更新记录
+            }
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
 }

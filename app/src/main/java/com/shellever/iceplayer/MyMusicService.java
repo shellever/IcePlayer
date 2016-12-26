@@ -28,8 +28,9 @@ import java.util.concurrent.Executors;
 public class MyMusicService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
-    public static final int FLAG_PLAY_LIST_LOCAL = 1;
-    public static final int FLAG_PLAY_LIST_FAVORITE = 2;
+    public static final int FLAG_PLAY_LIST_LOCAL = 1;       // 本地播放列表
+    public static final int FLAG_PLAY_LIST_FAVORITE = 2;    // 收藏列表
+    public static final int FLAG_PLAY_LIST_RECENT = 3;      // 最近播放列表
 
     public static final int PLAY_MODE_ORDER = 1;       // 顺序播放
     public static final int PLAY_MODE_RANDOM = 2;      // 随机播放
@@ -92,6 +93,10 @@ public class MyMusicService extends Service
 
     public void setPlayMode(int mPlayMode) {
         this.mPlayMode = mPlayMode;
+    }
+
+    public Mp3Info getCurMp3Info() {
+        return mMp3InfoList.get(curPos);
     }
 
     // 播放歌曲 (从暂停状态开始播放)

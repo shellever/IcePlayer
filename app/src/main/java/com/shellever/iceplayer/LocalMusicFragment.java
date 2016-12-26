@@ -14,6 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lidroid.xutils.db.sqlite.Selector;
+import com.lidroid.xutils.exception.DbException;
+
 import java.util.List;
 
 /**
@@ -110,6 +113,26 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
 
         mPlayPauseActionIv.setImageResource(R.drawable.pause);
         //showToast("LocalMusicFragment::onItemClick()");
+
+        storeToRecentRecord();  // 保存到最近播放记录表中
+    }
+
+    private void storeToRecentRecord() {
+        MainApplication app = (MainApplication) mMainActivity.getApplication();
+        Mp3Info current = mMainActivity.mMusicService.getCurMp3Info();
+        try {
+            Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getId()));
+            if (result == null) {       // 表中未有此记录
+                current.setMp3InfoId(current.getId());
+                current.setRecentPlayTime(System.currentTimeMillis());  // 设置系统当前时间
+                app.mDbUtils.save(current); // 保存记录
+            } else {
+                result.setRecentPlayTime(System.currentTimeMillis());   // 更新时间
+                app.mDbUtils.update(result, "recentPlayTime");  // 更新记录
+            }
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
     }
 
     // 每次点击列表歌曲项或者切换至下一首时会被回调 (绑定成功回调)

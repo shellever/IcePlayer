@@ -132,7 +132,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
     // 绑定成功后异步回调 (可以做些初始化操作)
     @Override
     public void change(int position) {
-        mMp3InfoList = mMusicService.mMp3InfoList;      // 同步播放列表
+        mMp3InfoList = mMusicService.mMp3InfoList;      // 同步播放列表+++
 
         Mp3Info mp3Info = mMp3InfoList.get(position);
         mSongNameTv.setText(mp3Info.getTitle());
@@ -163,10 +163,20 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         MainApplication app = (MainApplication) getApplication();
         try {
             Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", mp3Info.getMp3InfoId()));
+//            if (result == null) {
+//                mFavoriteIv.setImageResource(R.drawable.xin_bai);
+//            } else {
+//                mFavoriteIv.setImageResource(R.drawable.xin_hong);
+//            }
             if (result == null) {
                 mFavoriteIv.setImageResource(R.drawable.xin_bai);
             } else {
-                mFavoriteIv.setImageResource(R.drawable.xin_hong);
+                int isFavorite = result.getIsFavorite();
+                if (isFavorite == 1) {  // 返回值为null，且isFavorite为1时，一定为已收藏
+                    mFavoriteIv.setImageResource(R.drawable.xin_hong);
+                } else {
+                    mFavoriteIv.setImageResource(R.drawable.xin_bai);
+                }
             }
         } catch (DbException e) {
             e.printStackTrace();
@@ -220,22 +230,49 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                 MainApplication app = (MainApplication) getApplication();
                 Mp3Info current = mMp3InfoList.get(mMusicService.getCurrentPosition());
                 try {
-                    Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getMp3InfoId()));
+                    Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", getId(current)));
                     if (result == null) {
                         current.setMp3InfoId(current.getId());  // 因为DbUtils中默认主键是id
+                        current.setIsFavorite(1);       // fav
                         app.mDbUtils.save(current);             // 保存到数据库
                         showTip(R.string.tip_favorite_like);
                         mFavoriteIv.setImageResource(R.drawable.xin_hong);
-                    } else {
-                        app.mDbUtils.deleteById(Mp3Info.class, result.getId());
-                        showTip(R.string.tip_favorite_unlike);
-                        mFavoriteIv.setImageResource(R.drawable.xin_bai);
+                    } else {        // 查询到对应记录
+                        int isFavorite = result.getIsFavorite();
+                        if (isFavorite == 1) {
+                            result.setIsFavorite(0);
+                            mFavoriteIv.setImageResource(R.drawable.xin_bai);
+                            showTip(R.string.tip_favorite_unlike);
+                        } else {
+                            result.setIsFavorite(1);
+                            mFavoriteIv.setImageResource(R.drawable.xin_hong);
+                            showTip(R.string.tip_favorite_like);
+                        }
+
+                        app.mDbUtils.update(result, "isFavorite");  // 更新字段
+
+                        //app.mDbUtils.deleteById(Mp3Info.class, result.getId());
+                        //showTip(R.string.tip_favorite_unlike);
+                        //mFavoriteIv.setImageResource(R.drawable.xin_bai);
                     }
                 } catch (DbException e) {
                     e.printStackTrace();
                 }
                 break;
         }
+    }
+
+    private long getId(Mp3Info mp3Info) {
+        long id = 0;
+        switch (mMusicService.getCurPlayListFlag()) {
+            case MyMusicService.FLAG_PLAY_LIST_LOCAL:
+                id = mp3Info.getId();       // 本身手机媒体库中查询出来的id
+                break;
+            case MyMusicService.FLAG_PLAY_LIST_FAVORITE:
+                id = mp3Info.getMp3InfoId();    // 原先id被DbUtils所使用，故将id转移到Mp3InfoId中
+                break;
+        }
+        return id;
     }
 
     // isPause有问题，即起到的是刚开始启动时没有播放状态时会首先调用play(0)一次，以后就不再调用

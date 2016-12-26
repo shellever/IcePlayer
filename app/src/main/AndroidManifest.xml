@@ -29,8 +29,9 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".PlayingMusicActivity" />
-        <activity android:name=".FavoriteMusicActivity"></activity>
+        <activity android:label="@string/title_actionbar_playing" android:name=".PlayingMusicActivity" />
+        <activity android:label="@string/title_actionbar_favorite" android:name=".FavoriteMusicActivity" />
+        <activity android:label="@string/title_actionbar_recent" android:name=".RecentMusicActivity"/>
     </application>
 
 </manifest>

@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorDodgerBlue">#3F9FE0</color>
+    <color name="background_window">#E5E5E5</color>
 </resources>

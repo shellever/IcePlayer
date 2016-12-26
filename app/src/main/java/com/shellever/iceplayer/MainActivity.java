@@ -82,13 +82,16 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         switch (item.getItemId()){
             case R.id.menu_action_favorite:
                 Toast.makeText(mMusicService, "favorite", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this, FavoriteMusicActivity.class);
+                intent = new Intent(MainActivity.this, FavoriteMusicActivity.class);
                 startActivity(intent);
                 break;
             case R.id.menu_action_recent:
+                intent = new Intent(MainActivity.this, RecentMusicActivity.class);
+                startActivity(intent);
                 Toast.makeText(mMusicService, "recent", Toast.LENGTH_SHORT).show();
                 break;
         }
