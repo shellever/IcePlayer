@@ -29,7 +29,8 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".PlayingMusicActivity"></activity>
+        <activity android:name=".PlayingMusicActivity" />
+        <activity android:name=".FavoriteMusicActivity"></activity>
     </application>
 
 </manifest>

@@ -109,6 +109,8 @@ public class MyMusicService extends Service
         }
     }
 
+    // curPos只由prev()和next()方法才能手动修改其值，
+    // 故只需要在此两个方法中对修改后的curPos进行界限判断
     // 播放上一首
     public void prev() {
         curPos--;
@@ -178,6 +180,11 @@ public class MyMusicService extends Service
             }
         }
     };
+
+    // 用于设置播放收藏列表的音乐
+    public void setMp3InfoList(List<Mp3Info> list) {
+        mMp3InfoList = list;
+    }
 
     // 检查MediaPlayer是否正在播放
     private boolean checkMediaPlayer() {

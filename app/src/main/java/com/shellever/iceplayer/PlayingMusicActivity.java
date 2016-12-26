@@ -2,9 +2,12 @@ package com.shellever.iceplayer;
 
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 import com.lidroid.xutils.db.sqlite.Selector;
 import com.lidroid.xutils.exception.DbException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayingMusicActivity extends BaseActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
@@ -29,6 +33,9 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
     private TextView mStartedTimeTv;
     private TextView mSongDurationTv;
     private SeekBar mSeekBar;
+
+    private ViewPager mViewPager;
+    private List<View> mViewPagerItemList;
 
     private List<Mp3Info> mMp3InfoList;
 
@@ -50,7 +57,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playing_music);
 
-        mAlbumIv = (ImageView) findViewById(R.id.iv_activity_album);
+        // mAlbumIv = (ImageView) findViewById(R.id.iv_activity_album);
 
         mPlayModeIv = (ImageView) findViewById(R.id.iv_activity_playing_mode);
         mFavoriteIv = (ImageView) findViewById(R.id.iv_activity_favorite);
@@ -63,12 +70,14 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         mPlayPauseActionIv.setOnClickListener(this);
         mNextActionIv.setOnClickListener(this);
 
-        mSongNameTv = (TextView) findViewById(R.id.tv_activity_playing_song_name);
+        // mSongNameTv = (TextView) findViewById(R.id.tv_activity_playing_song_name);
         mStartedTimeTv = (TextView) findViewById(R.id.tv_activity_started_time);
         mSongDurationTv = (TextView) findViewById(R.id.tv_activity_song_duration);
 
         mSeekBar = (SeekBar) findViewById(R.id.sb_activity_progress);
         mSeekBar.setOnSeekBarChangeListener(this);
+
+        initViewPager();
 
         // 从LocalMusicFragment转到PlayingMusicActivity时，需要将进度值传过来，
         // 因为更新率为500毫秒，可能出现00:00的情况，故需要在创建时进行赋值操作
@@ -76,6 +85,22 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         mStartedTimeTv.setText(MediaUtils.formatTime(progress));
 
         mMp3InfoList = MediaUtils.getMp3InfoList(this);
+    }
+
+    private void initViewPager() {
+        mViewPager = (ViewPager) findViewById(R.id.vp_pager);
+
+        View lrc = getLayoutInflater().inflate(R.layout.viewpager_lrc_content, null);
+
+        View album = getLayoutInflater().inflate(R.layout.viewpager_album_picture, null);
+        mAlbumIv = (ImageView) album.findViewById(R.id.iv_activity_album);
+        mSongNameTv = (TextView) album.findViewById(R.id.tv_activity_playing_song_name);
+
+        mViewPagerItemList = new ArrayList<>();
+        mViewPagerItemList.add(album);
+        mViewPagerItemList.add(lrc);
+
+        mViewPager.setAdapter(new MyPagerAdapter(mViewPagerItemList));
     }
 
     // ========================================
@@ -236,6 +261,42 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
 
     }
     // =============================================================================
+
+    // ViewPager PagerAdapter
+    private class MyPagerAdapter extends PagerAdapter {
+
+        private List<View> mViewPagerItemList;
+
+        public MyPagerAdapter(List<View> list) {
+            mViewPagerItemList = list;
+        }
+
+        // 获取导航页面数目
+        @Override
+        public int getCount() {
+            return mViewPagerItemList.size();
+        }
+
+        // 判断View与Object是否相等，一般直接返回相等即可
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
+        }
+
+        // 实例化一个导航页面
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            View view = mViewPagerItemList.get(position);
+            container.addView(view);
+            return view;
+        }
+
+        // 移除一个导航页面
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView(mViewPagerItemList.get(position));
+        }
+    }
 
     // 播放模式提示信息
     private void showTip(int resId) {

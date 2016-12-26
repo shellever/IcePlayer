@@ -102,7 +102,7 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         mMainActivity.mMusicService.play(position); // 绑定成功之后才能调用Service的play方法，否则会报空指针异常
         mPlayPauseActionIv.setImageResource(R.drawable.pause);
-        showToast("LocalMusicFragment::onItemClick()");
+        //showToast("LocalMusicFragment::onItemClick()");
     }
 
     // 每次点击列表歌曲项或者切换至下一首时会被回调

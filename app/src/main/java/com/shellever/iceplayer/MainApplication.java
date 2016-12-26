@@ -23,6 +23,10 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // 初始化CrashHandler
+        CrashHandler.getInstance().init(this);
+
         sp = getSharedPreferences(BaseConstant.SP_NAME, Context.MODE_PRIVATE);
         mDbUtils = DbUtils.create(this, BaseConstant.DB_NAME);
     }

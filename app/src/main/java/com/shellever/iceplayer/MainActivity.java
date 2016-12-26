@@ -1,9 +1,13 @@
 package com.shellever.iceplayer;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 
@@ -67,6 +71,29 @@ public class MainActivity extends BaseActivity {
         }
     }
     // ========================================
+
+    // 选项菜单
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_action_favorite:
+                Toast.makeText(mMusicService, "favorite", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, FavoriteMusicActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.menu_action_recent:
+                Toast.makeText(mMusicService, "recent", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
+    }
+
 
     @Override
     protected void onDestroy() {

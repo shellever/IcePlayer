@@ -3,33 +3,14 @@
     android:id="@+id/activity_playing_music"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#5c5b5b"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_activity_playing_song_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:text="Lone Ranger"
-        android:textSize="24sp" />
-
-    <LinearLayout
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="20dp"
-        android:layout_weight="1"
-        android:gravity="center">
-
-        <ImageView
-            android:id="@+id/iv_activity_album"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/app_logo" />
-    </LinearLayout>
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,6 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="00:00"
+                android:textColor="#ffffff"
                 android:textSize="10sp" />
 
             <SeekBar
@@ -62,6 +44,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="00:00"
+                android:textColor="#ffffff"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -69,7 +52,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="#2d2c2c"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="10dp">
