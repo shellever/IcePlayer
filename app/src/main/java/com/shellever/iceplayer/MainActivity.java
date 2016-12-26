@@ -65,7 +65,8 @@ public class MainActivity extends BaseActivity {
         // 切换播放位置
         int curItem = mViewPager.getCurrentItem();
         if (curItem == 0) {
-            mLocalFragment.changeUIStatus(position);
+            //mLocalFragment.loadMp3InfoList();           // 同步Service中的数据列表
+            mLocalFragment.changeUIStatus(position);    // 更新UI状态
         } else if (curItem == 1) {
 
         }

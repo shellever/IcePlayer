@@ -17,7 +17,6 @@ public class FavoriteMusicActivity extends BaseActivity implements AdapterView.O
     private ListView mFavoriteMusicLv;
 
     private List<Mp3Info> mFavMp3InfoList;  // favorite list
-    private boolean isChange = false;   // 当前播放列表是否为收藏列表
 
 
     @Override
@@ -81,7 +80,8 @@ public class FavoriteMusicActivity extends BaseActivity implements AdapterView.O
     // AdapterView.OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (!isChange) {
+        if (mMusicService.getCurPlayListFlag() != mMusicService.FLAG_PLAY_LIST_FAVORITE) {
+            mMusicService.setCurPlayListFlag(MyMusicService.FLAG_PLAY_LIST_FAVORITE);
             mMusicService.setMp3InfoList(mFavMp3InfoList);
         }
         mMusicService.play(position);

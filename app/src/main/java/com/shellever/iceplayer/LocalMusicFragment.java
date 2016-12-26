@@ -67,7 +67,7 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
         mPlayingSongNameTv = (TextView) view.findViewById(R.id.tv_playing_song_name);
         mPlayingSingerNameTv = (TextView) view.findViewById(R.id.tv_playing_singer_name);
 
-        loadMp3InfoList();      // 加载Mp3列表
+        loadMp3InfoList();      // 加载Mp3列表(未绑定状态)
         return view;
     }
 
@@ -91,8 +91,10 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
         super.onDestroyView();
     }
 
-    private void loadMp3InfoList() {
-        mMp3InfoList = MediaUtils.getMp3InfoList(mMainActivity);
+    // 由MainActivity在绑定成功后进行回调
+    public void loadMp3InfoList() {
+        mMp3InfoList = MediaUtils.getMp3InfoList(mMainActivity);    //
+        //mMp3InfoList = mMainActivity.mMusicService.mMp3InfoList;        // 同步Service中的播放列表
         mLocalMusicAdapter = new LocalMusicAdapter(mMainActivity, mMp3InfoList);
         mLocalMusicLv.setAdapter(mLocalMusicAdapter);
     }
@@ -100,14 +102,21 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
     // AdapterView.OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (mMainActivity.mMusicService.getCurPlayListFlag() != MyMusicService.FLAG_PLAY_LIST_LOCAL) {
+            mMainActivity.mMusicService.setMp3InfoList(mMp3InfoList);
+        }
         mMainActivity.mMusicService.play(position); // 绑定成功之后才能调用Service的play方法，否则会报空指针异常
+
         mPlayPauseActionIv.setImageResource(R.drawable.pause);
         //showToast("LocalMusicFragment::onItemClick()");
     }
 
-    // 每次点击列表歌曲项或者切换至下一首时会被回调
+    // 每次点击列表歌曲项或者切换至下一首时会被回调 (绑定成功回调)
     public void changeUIStatus(int position) {
-        Mp3Info mp3Info = mMp3InfoList.get(position);
+        //Mp3Info mp3Info = mMp3InfoList.get(position);
+
+        // 播放状态则使用Service中的播放列表信息以显示收藏歌曲播放信息
+        Mp3Info mp3Info = mMainActivity.mMusicService.mMp3InfoList.get(position);
         mPlayingSongNameTv.setText(mp3Info.getTitle());
         mPlayingSingerNameTv.setText(mp3Info.getArtist());
         if (mMainActivity.mMusicService.isPlaying()) {

@@ -28,16 +28,21 @@ import java.util.concurrent.Executors;
 public class MyMusicService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
+    public static final int FLAG_PLAY_LIST_LOCAL = 1;
+    public static final int FLAG_PLAY_LIST_FAVORITE = 2;
+
     public static final int PLAY_MODE_ORDER = 1;       // 顺序播放
     public static final int PLAY_MODE_RANDOM = 2;      // 随机播放
     public static final int PLAY_MODE_SINGLE = 3;      // 单曲循环
 
     private MediaPlayer mMediaPlayer;
-    private List<Mp3Info> mMp3InfoList;
+    List<Mp3Info> mMp3InfoList;                         // 供Fragment数据同步
+    //private List<Mp3Info> mMp3InfoList;
     private int curPos;                                 // 当前播放的歌曲位置
     private boolean isPause = false;
     private int mPlayMode = PLAY_MODE_ORDER;            // 默认为顺序播放
     private Random random = new Random();
+    private int curPlayListFlag = FLAG_PLAY_LIST_LOCAL;          // 默认播放列表为本地音乐
 
     private ExecutorService mThreadExecutor;            // 单线程池
 
@@ -71,6 +76,14 @@ public class MyMusicService extends Service
 
         mThreadExecutor = Executors.newSingleThreadExecutor();   // 线程池初始化
         mThreadExecutor.execute(mMusicStatusUpdateTask);     // 执行任务
+    }
+
+    public int getCurPlayListFlag() {
+        return curPlayListFlag;
+    }
+
+    public void setCurPlayListFlag(int curPlayListFlag) {
+        this.curPlayListFlag = curPlayListFlag;
     }
 
     public int getPlayMode() {

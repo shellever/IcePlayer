@@ -84,7 +84,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         int progress = getIntent().getIntExtra("progress", 0);
         mStartedTimeTv.setText(MediaUtils.formatTime(progress));
 
-        mMp3InfoList = MediaUtils.getMp3InfoList(this);
+        //mMp3InfoList = MediaUtils.getMp3InfoList(this);     // 加载播放列表(应该同步Service中的列表)
     }
 
     private void initViewPager() {
@@ -132,6 +132,8 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
     // 绑定成功后异步回调 (可以做些初始化操作)
     @Override
     public void change(int position) {
+        mMp3InfoList = mMusicService.mMp3InfoList;      // 同步播放列表
+
         Mp3Info mp3Info = mMp3InfoList.get(position);
         mSongNameTv.setText(mp3Info.getTitle());
         mAlbumIv.setImageBitmap(MediaUtils.getArtwork(this, mp3Info.getId(), mp3Info.getAlbumId(), true, false));
@@ -160,7 +162,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
         // 初始化收藏状态
         MainApplication app = (MainApplication) getApplication();
         try {
-            Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", mp3Info.getId()));
+            Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", mp3Info.getMp3InfoId()));
             if (result == null) {
                 mFavoriteIv.setImageResource(R.drawable.xin_bai);
             } else {
@@ -218,7 +220,7 @@ public class PlayingMusicActivity extends BaseActivity implements View.OnClickLi
                 MainApplication app = (MainApplication) getApplication();
                 Mp3Info current = mMp3InfoList.get(mMusicService.getCurrentPosition());
                 try {
-                    Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getId()));
+                    Mp3Info result = app.mDbUtils.findFirst(Selector.from(Mp3Info.class).where("mp3InfoId", "=", current.getMp3InfoId()));
                     if (result == null) {
                         current.setMp3InfoId(current.getId());  // 因为DbUtils中默认主键是id
                         app.mDbUtils.save(current);             // 保存到数据库
