@@ -103,7 +103,8 @@ public class LocalMusicFragment extends Fragment implements AdapterView.OnItemCl
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mMainActivity.mMusicService.getCurPlayListFlag() != MyMusicService.FLAG_PLAY_LIST_LOCAL) {
-            mMainActivity.mMusicService.setMp3InfoList(mMp3InfoList);
+            mMainActivity.mMusicService.setCurPlayListFlag(MyMusicService.FLAG_PLAY_LIST_LOCAL);    // 设置标识
+            mMainActivity.mMusicService.setMp3InfoList(mMp3InfoList);   // 设置播放列表
         }
         mMainActivity.mMusicService.play(position); // 绑定成功之后才能调用Service的play方法，否则会报空指针异常
 

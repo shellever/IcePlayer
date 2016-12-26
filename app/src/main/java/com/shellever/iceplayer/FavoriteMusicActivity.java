@@ -81,8 +81,8 @@ public class FavoriteMusicActivity extends BaseActivity implements AdapterView.O
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mMusicService.getCurPlayListFlag() != mMusicService.FLAG_PLAY_LIST_FAVORITE) {
-            mMusicService.setCurPlayListFlag(MyMusicService.FLAG_PLAY_LIST_FAVORITE);
-            mMusicService.setMp3InfoList(mFavMp3InfoList);
+            mMusicService.setCurPlayListFlag(MyMusicService.FLAG_PLAY_LIST_FAVORITE);   // 设置当前播放列表标识
+            mMusicService.setMp3InfoList(mFavMp3InfoList);  // 设置当前播放列表为收藏的列表
         }
         mMusicService.play(position);
     }
